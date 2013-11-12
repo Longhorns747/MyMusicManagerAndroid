@@ -9,5 +9,6 @@
     <string name="PULL">PULL</string>
     <string name="CAP">CAP</string>
     <string name="LEAVE">LEAVE</string>
+    <string name="RECONNECT">RECONNECT</string>
 
 </resources>

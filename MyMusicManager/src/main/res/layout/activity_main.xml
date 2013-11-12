@@ -45,8 +45,7 @@
         android:orientation="horizontal"
         android:gravity="center"
         android:layout_width="fill_parent"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp">
+        android:paddingTop="10dp">
 
         <Button
             android:layout_width="wrap_content"
@@ -65,11 +64,28 @@
             android:layout_gravity="center_horizontal" />
     </LinearLayout>
 
-    <Button
-        android:layout_width="wrap_content"
+    <LinearLayout
         android:layout_height="wrap_content"
-        android:text="@string/LEAVE"
-        android:onClick="leave"
-        android:id="@+id/LEAVE"
-        android:layout_gravity="center_horizontal" />
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_width="fill_parent"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/LEAVE"
+            android:onClick="leave"
+            android:id="@+id/LEAVE"
+            android:layout_gravity="center_horizontal" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/RECONNECT"
+            android:onClick="reconnect"
+            android:id="@+id/RECONNECT"
+            android:layout_gravity="center_horizontal" />
+    </LinearLayout>
 </LinearLayout>

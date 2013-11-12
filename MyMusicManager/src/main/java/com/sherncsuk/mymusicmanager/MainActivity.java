@@ -20,12 +20,14 @@ public class MainActivity extends Activity {
     private OutputStream out;
     private DataInputStream inputStream;
     private ByteArrayOutputStream byteStream;
+    private boolean connected = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         new NetworkConnection(this).execute();
+        connected = true;
     }
 
 
@@ -79,7 +81,27 @@ public class MainActivity extends Activity {
      */
 
     public void leave(View v){
+        try{
+            sock.close();
+            inputStream.close();
+            out.close();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
 
+        connected = false;
+    }
+
+    /**
+     * Reconnects to the session
+     * @param v
+     */
+
+    public void reconnect(View v){
+        if(!connected){
+            new NetworkConnection(this).execute();
+            connected = true;
+        }
     }
 
     /**
