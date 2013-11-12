@@ -1,20 +1,39 @@
 package com.sherncsuk.mymusicmanager;
 
 import android.app.Activity;
-import android.support.v4.app.Fragment;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
+
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 public class MainActivity extends Activity {
+
+    //Network Connection Stuffz
+    private Socket sock;
+    private OutputStream out;
+    private DataInputStream inputStream;
+    private ByteArrayOutputStream byteStream;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        new NetworkConnection(this).execute();
+
+        try {
+            out = sock.getOutputStream();
+            inputStream = new DataInputStream(sock.getInputStream());
+            byteStream = new ByteArrayOutputStream();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
     }
 
 
@@ -69,5 +88,29 @@ public class MainActivity extends Activity {
 
     public void leave(View v){
 
+    }
+
+    /**
+     * A private inner class to help set up the connection to the server on a different thread
+     */
+
+    private class NetworkConnection extends AsyncTask<String, String, String> {
+        private MainActivity activity;
+
+        public NetworkConnection(MainActivity activity){
+            this.activity = activity;
+        }
+
+        @Override
+        protected String doInBackground(String[] strings) {
+            try {
+                sock = new Socket("130.207.114.21", 2222);
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
     }
 }
