@@ -25,4 +25,49 @@ public class MainActivity extends Activity {
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
+
+    /**
+     * A method that lists the files currently on a server
+     * @param v
+     */
+
+    public void list(View v){
+
+    }
+
+    /**
+     * Calculates the diff from files on the server to the Android directory
+     * @param v
+     */
+
+    public void diff(View v){
+
+    }
+
+    /**
+     * Pulls diff'd files from the server and saves them to the Android directory
+     * @param v
+     */
+
+    public void pull(View v){
+
+    }
+
+    /**
+     * Pulls most popular songs from the server up to a certain file cap
+     * @param v
+     */
+
+    public void cap(View v){
+
+    }
+
+    /**
+     * Leaves the session
+     * @param v
+     */
+
+    public void leave(View v){
+
+    }
 }
