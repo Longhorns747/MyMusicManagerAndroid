@@ -28,12 +28,14 @@
             android:layout_height="wrap_content"
             android:text="LIST"
             android:id="@+id/LIST"
+            android:onClick="list"
             android:layout_gravity="center_horizontal" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/DIFF"
+            android:onClick="diff"
             android:id="@+id/DIFF"
             android:layout_gravity="center_horizontal" />
     </LinearLayout>
@@ -51,12 +53,14 @@
             android:layout_height="wrap_content"
             android:text="@string/PULL"
             android:id="@+id/PULL"
+            android:onClick="pull"
             android:layout_gravity="center_horizontal" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/CAP"
+            android:onClick="cap"
             android:id="@+id/CAP"
             android:layout_gravity="center_horizontal" />
     </LinearLayout>
@@ -65,6 +69,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/LEAVE"
+        android:onClick="leave"
         android:id="@+id/LEAVE"
         android:layout_gravity="center_horizontal" />
 </LinearLayout>
