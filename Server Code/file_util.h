@@ -15,6 +15,7 @@ int alphasort(const struct dirent ** a, const struct dirent **b);
 int update_files(filestate* state);
 void free_files(filestate* state);
 void delta(filestate* receiver, filestate* sender, filestate* res);
+void get_capped_diff(int max_bytes, filestate* diff, filestate* res);
 void save_file(byte* fileBuffer, int fileSize, char* filename);
 
 byte* load_file(char fileName[], off_t fileSize) //how do I know what the filesize is?
@@ -160,5 +161,12 @@ void delta(filestate* receiver, filestate* sender, filestate* res)
     res->music_files = fileList;
 }
 
+void get_capped_diff(int max_bytes, filestate* diff, filestate* res)
+{
+    //for now, just return the same thing. Later, implement code the actually
+    //finds the top files in this diff that is passed in by parsing the itunes xml stuff
+    res->numFiles = diff->numFiles;
+    res->music_files = diff->music_files;
+}
 
 #endif

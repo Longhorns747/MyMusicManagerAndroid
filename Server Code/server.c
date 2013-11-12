@@ -12,6 +12,7 @@ void list(int sock);
 void leave(int sock, pthread_t thread);
 void pull(int sock);
 void diff(int sock);
+void cap(int sock, int max_bytes);
 void *ThreadMain(void *arg);
 
 struct ThreadArgs{
@@ -97,6 +98,10 @@ void *ThreadMain(void* threadArgs)
 	        case PULL:
 		        pull(clientSock);
                 break;
+            case CAP:
+                cap(clientSock, msg.max_bytes);
+                break;
+
         }
 
     }
@@ -169,6 +174,28 @@ void pull(int sock)
     delta(&senderIDs, &currState, &diff);
     send_music_files(&diff, sock);
 }
+
+//CAP is currently just a copy of the above pull function
+void cap(int sock, int max_bytes)
+{
+    char msg[] = {"server/pull: Doing a CAP :O\n"};
+    FILE* file = fopen(LOGNAME, "ab");
+    fputs(msg, file);
+    fclose(file);
+
+    printf("%s", msg);
+    filestate currState;
+    filestate senderIDs;
+    filestate diff;
+    filestate cappedDiff;
+
+    update_files(&currState);
+    rcv_IDs(&senderIDs, sock);
+    delta(&senderIDs, &currState, &diff);
+    get_capped_diff(max_bytes, &diff, &cappedDiff);
+    send_music_files(&diff, sock);
+}
+
 
 void diff(int sock)
 {
