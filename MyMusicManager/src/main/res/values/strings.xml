@@ -4,5 +4,10 @@
     <string name="app_name">MyMusicManager</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="LIST">LIST</string>
+    <string name="DIFF">DIFF</string>
+    <string name="PULL">PULL</string>
+    <string name="CAP">CAP</string>
+    <string name="LEAVE">LEAVE</string>
 
 </resources>
