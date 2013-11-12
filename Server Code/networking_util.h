@@ -25,12 +25,13 @@ void rcv_IDs(filestate* res, int sock);
 void send_music_files(filestate* state, int sock);
 void rcv_music_files(int sock);
 
-void create_message(message* msg, int numBytes, int msgType, int last_message, int filename_length)
+void create_message(message* msg, int numBytes, int msgType, int last_message, int filename_length, int max_bytes)
 {
     msg->num_bytes = numBytes;
     msg->type = msgType;
     msg->last_message = last_message;
     msg->filename_length = filename_length;
+    msg->max_bytes = max_bytes;
 }
 
 void send_message(message* msg, int sock)
