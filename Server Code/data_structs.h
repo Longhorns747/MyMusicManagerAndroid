@@ -11,7 +11,7 @@ int NUM_MESSAGES = 5;
 char selections[5][5] = {"LEAVE", "LIST", "PULL", "DIFF", "CAP"};
 
 typedef enum {
-	LEAVE, LIST, PULL, DIFF
+	LEAVE, LIST, PULL, DIFF, CAP
 } message_type;
 
 typedef struct 

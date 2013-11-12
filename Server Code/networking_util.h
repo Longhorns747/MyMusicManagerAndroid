@@ -8,13 +8,15 @@
 
 #define LAST_PACKET 1
 #define NOT_LAST_PACKET 0
+#define NO_CAP = -1
+
 #define PORT 2222
 #define BUFSIZE 1500
 #define MESSAGESIZE sizeof(message)
 
 typedef struct sockaddr_in sockaddr_in;
 
-void create_message(message* msg, int numBytes, int msgType, int last_message, int filename_length);
+void create_message(message* msg, int numBytes, int msgType, int last_message, int filename_length, int max_bytes);
 void send_message(message* msg, int sock);
 void send_payload(int size, byte* payload, int sock);
 void rcv_message(message* msg, int sock);
@@ -93,7 +95,7 @@ void send_filenames(filestate* state, int sock)
 
     	//create and send metadata message
     	message msg;
-        create_message(&msg, strlen(filename), -1, NOT_LAST_PACKET, strlen(filename)); //+1 for '/0'?
+        create_message(&msg, strlen(filename), -1, NOT_LAST_PACKET, strlen(filename), -1); //+1 for '/0'?
     	send_message(&msg, sock);
 
 	    //send filename
@@ -102,7 +104,7 @@ void send_filenames(filestate* state, int sock)
 
     //Make the last message to 
     message lastMsg;
-    create_message(&lastMsg, 0, DIFF, LAST_PACKET, 0);
+    create_message(&lastMsg, 0, DIFF, LAST_PACKET, 0, -1);
     send_message(&lastMsg, sock);
 }
 
@@ -120,7 +122,7 @@ void send_music_files(filestate* state, int sock)
 
     	//create and send metadata message
     	message msg;
-        create_message(&msg,fileAttributes.st_size, -1, NOT_LAST_PACKET, strlen(filename)); //+1?
+        create_message(&msg,fileAttributes.st_size, -1, NOT_LAST_PACKET, strlen(filename),-1); //+1?
 	    send_message(&msg, sock);
 
         //send the filename payload
@@ -134,7 +136,7 @@ void send_music_files(filestate* state, int sock)
     
     //Make the last message
     message lastMsg;
-    create_message(&lastMsg, 0, PULL, LAST_PACKET, 0);
+    create_message(&lastMsg, 0, PULL, LAST_PACKET, 0, -1);
     send_message(&lastMsg, sock);
 }
 
@@ -218,7 +220,7 @@ void send_ids(filestate* state, int sock)
         char* ID = state->music_files[i].ID;
 
         message msg;
-        create_message(&msg, strlen(ID), -1, NOT_LAST_PACKET, 0);
+        create_message(&msg, strlen(ID), -1, NOT_LAST_PACKET, 0, -1);
 	    send_message(&msg, sock);
 
         send_payload(strlen(ID), ID, sock);
@@ -226,7 +228,7 @@ void send_ids(filestate* state, int sock)
 
     //Make the last message
     message lastMsg;
-    create_message(&lastMsg, 0, -1, LAST_PACKET, 0);
+    create_message(&lastMsg, 0, -1, LAST_PACKET, 0, -1);
     send_message(&lastMsg, sock);
 }
 
