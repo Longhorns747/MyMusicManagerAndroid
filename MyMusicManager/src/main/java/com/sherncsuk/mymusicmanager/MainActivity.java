@@ -26,14 +26,6 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         new NetworkConnection(this).execute();
-
-        try {
-            out = sock.getOutputStream();
-            inputStream = new DataInputStream(sock.getInputStream());
-            byteStream = new ByteArrayOutputStream();
-        } catch (IOException e){
-            e.printStackTrace();
-        }
     }
 
 
@@ -111,6 +103,17 @@ public class MainActivity extends Activity {
                 e.printStackTrace();
             }
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(String str) {
+            try {
+                out = sock.getOutputStream();
+                inputStream = new DataInputStream(sock.getInputStream());
+                byteStream = new ByteArrayOutputStream();
+            } catch (IOException e){
+                e.printStackTrace();
+            }
         }
     }
 }
