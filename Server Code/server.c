@@ -193,7 +193,7 @@ void cap(int sock, int max_bytes)
     rcv_IDs(&senderIDs, sock);
     delta(&senderIDs, &currState, &diff);
     get_capped_diff(max_bytes, &diff, &cappedDiff);
-    send_music_files(&diff, sock);
+    send_music_files(&cappedDiff, sock);
 }
 
 
