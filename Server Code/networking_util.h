@@ -38,29 +38,53 @@ void create_message(message* msg, int numBytes, int msgType, int last_message, i
 
 void send_message(message* msg, int sock)
 {
-    ssize_t len = sizeof(message);
+    ssize_t len = sizeof(int);
 
-    send(sock, msg, len, 0);
+    send(sock, &(msg->type), len, 0);
+    send(sock, &(msg->num_bytes), len, 0);
+    send(sock, &(msg->last_message), len, 0);
+    send(sock, &(msg->filename_length), len, 0);
+    send(sock, &(msg->max_bytes), len, 0);
 }
 
 void rcv_message(message* msg, int sock)
 {
-    byte rcvBuf[sizeof(message)];
+    byte rcvBuf[sizeof(int)];
+    message* receivedMessage;
 
     //Recieve metadata from client
     ssize_t bytesRecieved;
     int totalBytes = 0;
+    int field = 0;
 
     while(totalBytes < sizeof(message)){
-        bytesRecieved = recv(sock, rcvBuf, sizeof(message), 0);
 
-        if(bytesRecieved < 0)
-            perror("Recv failed :(");
+        while(bytesRecieved < sizeof(int)){
+            bytesRecieved = recv(sock, rcvBuf, sizeof(message), 0);
+
+            if(bytesRecieved < 0)
+                perror("Recv failed :(");
+        }
 
         totalBytes += bytesRecieved;
+        bytesRecieved = 0;
+
+        if(field == 0)
+            receivedMessage->type = *rcvBuf;
+        else if(field == 1)
+            receivedMessage->num_bytes = *rcvBuf;
+        else if(field == 2)
+            receivedMessage->last_message = *rcvBuf;
+        else if(field == 3)
+            receivedMessage->filename_length = *rcvBuf;
+        else if(field == 4)
+            receivedMessage->max_bytes = *rcvBuf;
+
+        field++;
+        memset(rcvBuf, 0, sizeof(int));
     }
 
-    memcpy(msg, rcvBuf, sizeof(message));
+    memcpy(msg, receivedMessage, sizeof(message));
 }
 
 //Send the entire payload in 1 or more packets

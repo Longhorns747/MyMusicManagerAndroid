@@ -11,6 +11,7 @@ import java.io.File;
 public class MusicFile {
     private String filename;
     private byte[] ID;
+    private int fileSize;
 
     public MusicFile(String filename, File musicFile) {
         this.filename = filename;
@@ -31,5 +32,13 @@ public class MusicFile {
 
     public byte[] getID() {
         return ID;
+    }
+
+    public int getFileSize() {
+        return fileSize;
+    }
+
+    public void setFileSize(int fileSize) {
+        this.fileSize = fileSize;
     }
 }
