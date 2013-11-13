@@ -18,6 +18,7 @@ typedef struct
 {
 	char* filename;
 	unsigned char* ID;
+	int fileSize;
 } music_file;
 
 typedef struct

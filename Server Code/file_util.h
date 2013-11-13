@@ -18,7 +18,7 @@ void delta(filestate* receiver, filestate* sender, filestate* res);
 void get_capped_diff(int max_bytes, filestate* diff, filestate* res);
 void save_file(byte* fileBuffer, int fileSize, char* filename);
 
-byte* load_file(char fileName[], off_t fileSize) //how do I know what the filesize is?
+byte* load_file(char fileName[], off_t fileSize) 
 {
 	//Open an I/O stream to the file
 	FILE* fileStream;
@@ -91,6 +91,7 @@ int update_files(filestate* state)
     		stat(files[i]->d_name, &fileAttributes);
     		fileList[i].filename = files[i]->d_name;
     		fileList[i].ID = get_unique_id(files[i]->d_name, fileAttributes.st_size);
+            fileList[i].fileSize = fileAttributes.st_size;
     	}
     }
     else
