@@ -50,7 +50,7 @@ void send_message(message* msg, int sock)
 void rcv_message(message* msg, int sock)
 {
     byte rcvBuf[sizeof(int)];
-    message* receivedMessage;
+    message* receivedMessage = (message *)malloc(sizeof(message));
 
     //Recieve metadata from client
     ssize_t bytesRecieved;
@@ -60,7 +60,7 @@ void rcv_message(message* msg, int sock)
     while(totalBytes < sizeof(message)){
 
         while(bytesRecieved < sizeof(int)){
-            bytesRecieved = recv(sock, rcvBuf, sizeof(message), 0);
+            bytesRecieved = recv(sock, rcvBuf, sizeof(int), 0);
 
             if(bytesRecieved < 0)
                 perror("Recv failed :(");
