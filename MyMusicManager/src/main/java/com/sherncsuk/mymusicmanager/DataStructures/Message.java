@@ -1,9 +1,15 @@
 package com.sherncsuk.mymusicmanager.DataStructures;
 
+import android.annotation.TargetApi;
+import android.os.Build;
+
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Arrays;
 
 /**
  * Author: Ethan Shernan
@@ -25,6 +31,23 @@ public class Message {
         public int getVal(){
             return val;
         }
+
+        public static MessageType getType(int val){
+            switch(val){
+                case 0:
+                    return LEAVE;
+                case 1:
+                    return LIST;
+                case 2:
+                    return PULL;
+                case 3:
+                    return DIFF;
+                case 4:
+                    return CAP;
+            }
+
+            return null;
+        }
     }
 
     private MessageType type;
@@ -32,6 +55,7 @@ public class Message {
     private int lastMessage;
     private int filenameLength;
     private int maxBytes;
+    public static final int NUM_MESSAGE_FIELDS = 5;
 
     public Message(int numBytes, MessageType type, int lastMessage,
                    int filenameLength, int maxBytes){
@@ -42,20 +66,7 @@ public class Message {
         this.maxBytes = maxBytes;
     }
 
-    public static void sendMessage(Socket sock, Message msg){
-        try{
-            OutputStream outStream = sock.getOutputStream();
-            DataOutputStream out = new DataOutputStream(outStream);
-            out.writeInt(msg.getType().getVal());
-            out.writeInt(msg.getNumBytes());
-            out.writeInt(msg.isLastMessage());
-            out.writeInt(msg.getFilenameLength());
-            out.writeInt(msg.getMaxBytes());
-            out.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+    public Message(){}
 
     public int getNumBytes() {
         return numBytes;

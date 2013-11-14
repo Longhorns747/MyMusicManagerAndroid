@@ -84,7 +84,7 @@ public class MainActivity extends Activity {
 
     public void leave(View v){
         sendInitialMessage(Message.MessageType.LEAVE);
-        
+
         try{
             sock.close();
             inputStream.close();
@@ -116,7 +116,7 @@ public class MainActivity extends Activity {
     public void sendInitialMessage(Message.MessageType type){
         Message initialMessage = new Message(0, type,
                 Message.MessageType.LAST_MESSAGE.getVal(), 0, 0);
-        Message.sendMessage(sock, initialMessage);
+        NetworkingUtil.sendMessage(sock, initialMessage);
     }
 
     /**
