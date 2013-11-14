@@ -69,16 +69,17 @@ void rcv_message(message* msg, int sock)
         totalBytes += bytesRecieved;
         bytesRecieved = 0;
 
+        //Need to read the rcvBuf as an int to use ntohl, thus the weird casting stuff
         if(field == 0)
-            receivedMessage->type = *rcvBuf;
+            receivedMessage->type = ntohl(*((int *)rcvBuf));
         else if(field == 1)
-            receivedMessage->num_bytes = *rcvBuf;
+            receivedMessage->num_bytes = ntohl(*((int *)rcvBuf));
         else if(field == 2)
-            receivedMessage->last_message = *rcvBuf;
+            receivedMessage->last_message = ntohl(*((int *)rcvBuf));
         else if(field == 3)
-            receivedMessage->filename_length = *rcvBuf;
+            receivedMessage->filename_length = ntohl(*((int *)rcvBuf));
         else if(field == 4)
-            receivedMessage->max_bytes = *rcvBuf;
+            receivedMessage->max_bytes = ntohl(*((int *)rcvBuf));
 
         field++;
         memset(rcvBuf, 0, sizeof(int));

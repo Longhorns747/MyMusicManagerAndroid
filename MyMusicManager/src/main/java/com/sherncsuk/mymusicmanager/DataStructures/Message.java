@@ -1,5 +1,10 @@
 package com.sherncsuk.mymusicmanager.DataStructures;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.Socket;
+
 /**
  * Author: Ethan Shernan
  * Date: 11/12/13
@@ -23,27 +28,42 @@ public class Message {
         }
     }
 
-    private String fileName;
     private MessageType type;
-    private boolean lastMessage;
+    private int numBytes;
+    private int lastMessage;
     private int filenameLength;
     private int maxBytes;
 
-    public Message(String fileName, MessageType type, boolean lastMessage,
+    public Message(int numBytes, MessageType type, int lastMessage,
                    int filenameLength, int maxBytes){
-        this.fileName = fileName;
+        this.numBytes = numBytes;
         this.type = type;
         this.lastMessage = lastMessage;
         this.filenameLength = filenameLength;
         this.maxBytes = maxBytes;
     }
 
-    public String getFileName() {
-        return fileName;
+    public static void sendMessage(Socket sock, Message msg){
+        try{
+            OutputStream outStream = sock.getOutputStream();
+            DataOutputStream out = new DataOutputStream(outStream);
+            out.writeInt(msg.getType().getVal());
+            out.writeInt(msg.getNumBytes());
+            out.writeInt(msg.isLastMessage());
+            out.writeInt(msg.getFilenameLength());
+            out.writeInt(msg.getMaxBytes());
+            out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public int getNumBytes() {
+        return numBytes;
+    }
+
+    public void setNumBytes(int numBytes) {
+        this.numBytes = numBytes;
     }
 
     public MessageType getType() {
@@ -54,11 +74,11 @@ public class Message {
         this.type = type;
     }
 
-    public boolean isLastMessage() {
+    public int isLastMessage() {
         return lastMessage;
     }
 
-    public void setLastMessage(boolean lastMessage) {
+    public void setLastMessage(int lastMessage) {
         this.lastMessage = lastMessage;
     }
 

@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
 
+import com.sherncsuk.mymusicmanager.DataStructures.Message;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -45,7 +47,7 @@ public class MainActivity extends Activity {
      */
 
     public void list(View v){
-
+        Message.sendMessage(sock, new Message(0, Message.MessageType.LIST, 1, 5, 5));
     }
 
     /**
