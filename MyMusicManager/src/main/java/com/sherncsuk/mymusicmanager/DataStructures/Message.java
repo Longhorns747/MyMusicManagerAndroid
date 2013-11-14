@@ -13,9 +13,8 @@ import java.net.Socket;
  */
 
 public class Message {
-
     public enum MessageType {
-        LEAVE(0), LIST(1), PULL(2), DIFF(3), CAP(4);
+        LEAVE(0), LIST(1), PULL(2), DIFF(3), CAP(4), LAST_MESSAGE(0), NOT_LAST(1);
 
         private int val;
 

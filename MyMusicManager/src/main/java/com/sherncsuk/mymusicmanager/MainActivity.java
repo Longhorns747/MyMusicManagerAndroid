@@ -47,7 +47,7 @@ public class MainActivity extends Activity {
      */
 
     public void list(View v){
-        Message.sendMessage(sock, new Message(0, Message.MessageType.LIST, 1, 5, 5));
+        sendInitialMessage(Message.MessageType.LIST);
     }
 
     /**
@@ -56,7 +56,7 @@ public class MainActivity extends Activity {
      */
 
     public void diff(View v){
-
+        sendInitialMessage(Message.MessageType.DIFF);
     }
 
     /**
@@ -65,7 +65,7 @@ public class MainActivity extends Activity {
      */
 
     public void pull(View v){
-
+        sendInitialMessage(Message.MessageType.PULL);
     }
 
     /**
@@ -74,7 +74,7 @@ public class MainActivity extends Activity {
      */
 
     public void cap(View v){
-
+        sendInitialMessage(Message.MessageType.CAP);
     }
 
     /**
@@ -83,6 +83,8 @@ public class MainActivity extends Activity {
      */
 
     public void leave(View v){
+        sendInitialMessage(Message.MessageType.LEAVE);
+        
         try{
             sock.close();
             inputStream.close();
@@ -104,6 +106,17 @@ public class MainActivity extends Activity {
             new NetworkConnection(this).execute();
             connected = true;
         }
+    }
+
+    /**
+     * Sends the initial control message to the server
+     * @param type
+     */
+
+    public void sendInitialMessage(Message.MessageType type){
+        Message initialMessage = new Message(0, type,
+                Message.MessageType.LAST_MESSAGE.getVal(), 0, 0);
+        Message.sendMessage(sock, initialMessage);
     }
 
     /**
