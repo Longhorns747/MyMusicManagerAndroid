@@ -38,13 +38,18 @@ void create_message(message* msg, int numBytes, int msgType, int last_message, i
 
 void send_message(message* msg, int sock)
 {
-    ssize_t len = sizeof(int);
+    ssize_t len = sizeof(uint32_t);
+    uint32_t message_fields[5];
+    message_fields[0] = htonl(msg->type);
+    message_fields[1] = htonl(msg->num_bytes);
+    message_fields[2] = htonl(msg->last_message);
+    message_fields[3] = htonl(msg->filename_length);
+    message_fields[4] = htonl(msg->max_bytes);
 
-    send(sock, &(msg->type), len, 0);
-    send(sock, &(msg->num_bytes), len, 0);
-    send(sock, &(msg->last_message), len, 0);
-    send(sock, &(msg->filename_length), len, 0);
-    send(sock, &(msg->max_bytes), len, 0);
+    for(int i = 0; i < 5; i++){
+        send(sock, message_fields + (sizeof(uint32_t) * i), len, 0);
+    }
+    
 }
 
 void rcv_message(message* msg, int sock)
@@ -70,16 +75,23 @@ void rcv_message(message* msg, int sock)
         bytesRecieved = 0;
 
         //Need to read the rcvBuf as an int to use ntohl, thus the weird casting stuff
-        if(field == 0)
-            receivedMessage->type = ntohl(*((int *)rcvBuf));
-        else if(field == 1)
-            receivedMessage->num_bytes = ntohl(*((int *)rcvBuf));
-        else if(field == 2)
-            receivedMessage->last_message = ntohl(*((int *)rcvBuf));
-        else if(field == 3)
-            receivedMessage->filename_length = ntohl(*((int *)rcvBuf));
-        else if(field == 4)
-            receivedMessage->max_bytes = ntohl(*((int *)rcvBuf));
+        switch(field){
+            case 0:
+                receivedMessage->type = ntohl(*((int *)rcvBuf));
+                break;
+            case 1:
+                receivedMessage->num_bytes = ntohl(*((int *)rcvBuf));
+                break;
+            case 2:
+                receivedMessage->last_message = ntohl(*((int *)rcvBuf));
+                break;
+            case 3:
+                receivedMessage->filename_length = ntohl(*((int *)rcvBuf));
+                break;
+            case 4:
+                receivedMessage->max_bytes = ntohl(*((int *)rcvBuf));
+                break;
+        }
 
         field++;
         memset(rcvBuf, 0, sizeof(int));
