@@ -48,6 +48,7 @@ public class MainActivity extends Activity {
 
     public void list(View v){
         sendInitialMessage(Message.MessageType.LIST);
+        String[] filenames = NetworkingUtil.recieveFilenames(sock);
     }
 
     /**

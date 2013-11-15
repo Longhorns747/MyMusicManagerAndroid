@@ -5,12 +5,15 @@ import android.os.Build;
 
 import com.sherncsuk.mymusicmanager.DataStructures.Message;
 
+import org.apache.http.entity.ByteArrayEntity;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -76,6 +79,40 @@ public class NetworkingUtil {
         }
 
         return res;
+    }
+
+    @TargetApi(Build.VERSION_CODES.GINGERBREAD)
+    public static String[] recieveFilenames(Socket sock){
+        ArrayList<String> res = new ArrayList<String>();
+        Message currMessage = receiveMessage(sock);
+        DataInputStream inputStream;
+        ByteArrayOutputStream byteStream;
+
+        try {
+            inputStream = new DataInputStream(sock.getInputStream());
+            byteStream = new ByteArrayOutputStream();
+
+            //Keep receiving messages until we hit the last message
+            while(currMessage.isLastMessage() == Message.MessageType.NOT_LAST.getVal()){
+
+                int i = 0;
+                //Keep receiving bytes until we get the last byte
+                while(i < currMessage.getNumBytes()){
+                    int retData = inputStream.readUnsignedByte();
+                    byteStream.write(retData);
+                    i++;
+                }
+
+                byte result[] = Arrays.copyOf(byteStream.toByteArray(), 32);
+                res.add(new String(result));
+
+                currMessage = receiveMessage(sock);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return res.toArray(new String[res.size()]);
     }
 
     //http://stackoverflow.com/questions/5399798/byte-array-and-int-conversion-in-java

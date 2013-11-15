@@ -20,7 +20,7 @@ import java.util.Arrays;
 
 public class Message {
     public enum MessageType {
-        LEAVE(0), LIST(1), PULL(2), DIFF(3), CAP(4), LAST_MESSAGE(0), NOT_LAST(1);
+        LEAVE(0), LIST(1), PULL(2), DIFF(3), CAP(4), LAST_MESSAGE(1), NOT_LAST(0);
 
         private int val;
 
