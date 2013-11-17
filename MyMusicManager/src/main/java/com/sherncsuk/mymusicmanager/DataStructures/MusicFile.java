@@ -1,6 +1,13 @@
 package com.sherncsuk.mymusicmanager.DataStructures;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Author: Ethan Shernan
@@ -18,8 +25,37 @@ public class MusicFile {
         ID = generateID(musicFile);
     }
 
+    /**
+     * Generates the MD5 hashed checksum of the musicfile
+     * @param musicFile
+     * @return digest
+     */
+
     private byte[] generateID(File musicFile){
-        return null;
+        MessageDigest md = null;
+
+        try{
+             md = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e){
+            e.printStackTrace();
+        }
+
+        try {
+            InputStream in = new FileInputStream(musicFile);
+            DigestInputStream dis = new DigestInputStream(in, md);
+            int currByte = dis.read();
+
+            while(currByte != -1){
+                currByte = dis.read();
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return md.digest();
     }
 
     public String getFilename() {

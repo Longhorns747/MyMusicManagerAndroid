@@ -1,13 +1,13 @@
 package com.sherncsuk.mymusicmanager;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
 
 import com.sherncsuk.mymusicmanager.DataStructures.Message;
+import com.sherncsuk.mymusicmanager.Utils.NetworkingUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
