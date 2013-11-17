@@ -50,11 +50,13 @@ public class NetworkingUtil {
             int field = 0;
             while(field < Message.NUM_MESSAGE_FIELDS){
                 for(int i = 0; i < 4; i++){
-                    int retData = inputStream.readUnsignedByte();
+                    byte retData = inputStream.readByte();
                     byteStream.write(retData);
                 }
 
-                byte result[] = Arrays.copyOf(byteStream.toByteArray(), 32);
+                byte result[] = Arrays.copyOf(byteStream.toByteArray(), 4);
+                byteStream.reset();
+
                 int val = byteArrayToInt(result);
 
                 switch(field){
@@ -74,6 +76,8 @@ public class NetworkingUtil {
                         res.setMaxBytes(val);
                         break;
                 }
+
+                field++;
             }
         } catch (IOException e){
             e.printStackTrace();
@@ -112,13 +116,15 @@ public class NetworkingUtil {
 
                     int i = 0;
                     //Keep receiving bytes until we get the last byte
-                    while(i < currMessage.getNumBytes()){
+                    while(i < currMessage.getFilenameLength()){
                         int retData = inputStream.readUnsignedByte();
                         byteStream.write(retData);
                         i++;
                     }
 
-                    byte result[] = Arrays.copyOf(byteStream.toByteArray(), 32);
+                    byte result[] = Arrays.copyOf(byteStream.toByteArray(), currMessage.getFilenameLength());
+                    byteStream.reset();
+
                     res.add(new String(result));
 
                     currMessage = receiveMessage(sock[0]);
@@ -136,7 +142,7 @@ public class NetworkingUtil {
             StringBuilder stringBuilder = new StringBuilder();
 
             for(int i = 0; i < filenames.length; i++){
-                stringBuilder.append("File " + i + " : " + filenames[i] + "\n");
+                stringBuilder.append("File " + (i + 1) + " : " + filenames[i] + "\n");
             }
 
             builder.setMessage(stringBuilder.toString());

@@ -138,7 +138,7 @@ public class MainActivity extends Activity {
         @Override
         protected String doInBackground(String[] strings) {
             try {
-                sock = new Socket("130.207.114.21", 2222);
+                sock = new Socket("130.207.114.21", 2223);
             } catch (UnknownHostException e) {
                 e.printStackTrace();
             } catch (IOException e) {

@@ -10,7 +10,7 @@
 #define NOT_LAST_PACKET 0
 #define NO_CAP = -1
 
-#define PORT 2222
+#define PORT 2223
 #define BUFSIZE 1500
 #define MESSAGESIZE sizeof(message)
 
@@ -47,7 +47,7 @@ void send_message(message* msg, int sock)
     message_fields[4] = htonl(msg->max_bytes);
 
     for(int i = 0; i < 5; i++){
-        send(sock, message_fields + (sizeof(uint32_t) * i), len, 0);
+        send(sock, &message_fields[i], len, 0);
     }
     
 }
