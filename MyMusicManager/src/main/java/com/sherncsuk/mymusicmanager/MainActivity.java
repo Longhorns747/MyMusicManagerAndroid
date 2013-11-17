@@ -6,7 +6,9 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
 
+import com.sherncsuk.mymusicmanager.DataStructures.Filestate;
 import com.sherncsuk.mymusicmanager.DataStructures.Message;
+import com.sherncsuk.mymusicmanager.Utils.FileUtil;
 import com.sherncsuk.mymusicmanager.Utils.NetworkingUtil;
 
 import java.io.ByteArrayOutputStream;
@@ -24,7 +26,10 @@ public class MainActivity extends Activity {
     private DataInputStream inputStream;
     private ByteArrayOutputStream byteStream;
     private boolean connected = false;
+
+    //Utilities
     private NetworkingUtil networkingUtil;
+    private FileUtil fileutil;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +38,7 @@ public class MainActivity extends Activity {
         new NetworkConnection(this).execute();
 
         networkingUtil = new NetworkingUtil();
+        fileutil = new FileUtil(getApplicationContext());
         connected = true;
     }
 
@@ -62,6 +68,9 @@ public class MainActivity extends Activity {
 
     public void diff(View v){
         sendInitialMessage(Message.MessageType.DIFF);
+        Filestate currentState = fileutil.updateFiles();
+        networkingUtil.sendIDs(currentState, sock);
+        networkingUtil.recieveFilenames(this, sock);
     }
 
     /**
