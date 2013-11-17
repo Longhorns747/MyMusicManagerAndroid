@@ -1,6 +1,7 @@
 package com.sherncsuk.mymusicmanager;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
@@ -23,12 +24,15 @@ public class MainActivity extends Activity {
     private DataInputStream inputStream;
     private ByteArrayOutputStream byteStream;
     private boolean connected = false;
+    private NetworkingUtil networkingUtil;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         new NetworkConnection(this).execute();
+
+        networkingUtil = new NetworkingUtil();
         connected = true;
     }
 
@@ -48,7 +52,7 @@ public class MainActivity extends Activity {
 
     public void list(View v){
         sendInitialMessage(Message.MessageType.LIST);
-        String[] filenames = NetworkingUtil.recieveFilenames(sock);
+        networkingUtil.recieveFilenames(this, sock);
     }
 
     /**

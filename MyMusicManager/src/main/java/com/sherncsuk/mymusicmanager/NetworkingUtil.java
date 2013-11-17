@@ -1,11 +1,12 @@
 package com.sherncsuk.mymusicmanager;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.os.AsyncTask;
 import android.os.Build;
 
 import com.sherncsuk.mymusicmanager.DataStructures.Message;
-
-import org.apache.http.entity.ByteArrayEntity;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -81,38 +82,67 @@ public class NetworkingUtil {
         return res;
     }
 
-    @TargetApi(Build.VERSION_CODES.GINGERBREAD)
-    public static String[] recieveFilenames(Socket sock){
-        ArrayList<String> res = new ArrayList<String>();
-        Message currMessage = receiveMessage(sock);
-        DataInputStream inputStream;
-        ByteArrayOutputStream byteStream;
 
-        try {
-            inputStream = new DataInputStream(sock.getInputStream());
-            byteStream = new ByteArrayOutputStream();
+    public void recieveFilenames(Activity activity, Socket sock){
+        new FilenameReceiver(activity).execute(sock);
+    }
 
-            //Keep receiving messages until we hit the last message
-            while(currMessage.isLastMessage() == Message.MessageType.NOT_LAST.getVal()){
 
-                int i = 0;
-                //Keep receiving bytes until we get the last byte
-                while(i < currMessage.getNumBytes()){
-                    int retData = inputStream.readUnsignedByte();
-                    byteStream.write(retData);
-                    i++;
-                }
+    private class FilenameReceiver extends AsyncTask<Socket, String, String[]> {
+        Activity activity;
 
-                byte result[] = Arrays.copyOf(byteStream.toByteArray(), 32);
-                res.add(new String(result));
-
-                currMessage = receiveMessage(sock);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        public FilenameReceiver(Activity activity){
+            this.activity = activity;
         }
 
-        return res.toArray(new String[res.size()]);
+        @TargetApi(Build.VERSION_CODES.GINGERBREAD)
+        @Override
+        protected String[] doInBackground(Socket... sock) {
+            ArrayList<String> res = new ArrayList<String>();
+            Message currMessage = receiveMessage(sock[0]);
+            DataInputStream inputStream;
+            ByteArrayOutputStream byteStream;
+
+            try {
+                inputStream = new DataInputStream(sock[0].getInputStream());
+                byteStream = new ByteArrayOutputStream();
+
+                //Keep receiving messages until we hit the last message
+                while(currMessage.isLastMessage() == Message.MessageType.NOT_LAST.getVal()){
+
+                    int i = 0;
+                    //Keep receiving bytes until we get the last byte
+                    while(i < currMessage.getNumBytes()){
+                        int retData = inputStream.readUnsignedByte();
+                        byteStream.write(retData);
+                        i++;
+                    }
+
+                    byte result[] = Arrays.copyOf(byteStream.toByteArray(), 32);
+                    res.add(new String(result));
+
+                    currMessage = receiveMessage(sock[0]);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return res.toArray(new String[res.size()]);
+        }
+
+        @Override
+        protected void onPostExecute(String[] filenames) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+            StringBuilder stringBuilder = new StringBuilder();
+
+            for(int i = 0; i < filenames.length; i++){
+                stringBuilder.append("File " + i + " : " + filenames[i] + "\n");
+            }
+
+            builder.setMessage(stringBuilder.toString());
+            builder.setTitle("Files");
+            (builder.create()).show();
+        }
     }
 
     //http://stackoverflow.com/questions/5399798/byte-array-and-int-conversion-in-java
@@ -125,4 +155,5 @@ public class NetworkingUtil {
         }
         return value;
     }
+
 }
