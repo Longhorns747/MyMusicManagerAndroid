@@ -6,11 +6,14 @@ import android.app.AlertDialog;
 import android.os.AsyncTask;
 import android.os.Build;
 
+import com.sherncsuk.mymusicmanager.DataStructures.Filestate;
 import com.sherncsuk.mymusicmanager.DataStructures.Message;
+import com.sherncsuk.mymusicmanager.DataStructures.MusicFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -175,6 +178,36 @@ public class NetworkingUtil {
             builder.setMessage(stringBuilder.toString());
             builder.setTitle("Files");
             (builder.create()).show();
+        }
+    }
+
+    /**
+     * A method that sends the MD5 checksums of all files in a filestate to the server
+     * @param state
+     * @param sock
+     */
+
+    public void sendIDs(Filestate state, Socket sock){
+        try{
+            OutputStream outStream = sock.getOutputStream();
+            DataOutputStream out = new DataOutputStream(outStream);
+
+            for(MusicFile file: state.getMusicFiles()){
+                Message metadata = new Message(file.getID().length, Message.MessageType.NOT_LAST,
+                        Message.MessageType.NOT_LAST.getVal(), 0, -1);
+
+                sendMessage(sock, metadata);
+
+                out.write(file.getID());
+                out.flush();
+            }
+
+            Message last = new Message(0, Message.MessageType.LAST_MESSAGE,  Message.MessageType.LAST_MESSAGE.getVal(),
+                    0, -1);
+            sendMessage(sock, last);
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
