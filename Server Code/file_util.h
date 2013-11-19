@@ -168,7 +168,7 @@ void get_capped_diff(int max_bytes, filestate* diff, filestate* res)
 {
     
     int numFiles = diff->numFiles;                                                                                 
-    set_playcount_mappings(&diff,numFiles);
+    set_playcount_mappings(diff,numFiles);
     filestate* sorted_diff;
     //sort(&diff, &sorted_diff);
 
@@ -202,6 +202,9 @@ void set_playcount_mappings(filestate* diff, int numFiles){
     int files_mapped = 0; 
     int lookForFilename = 0;
     char * filename;
+    char * raw_filename;
+
+    int i;
 
     fp = fopen(ITUNES_XML_FILEPATH, "r");
     if (fp == NULL)
@@ -219,13 +222,32 @@ void set_playcount_mappings(filestate* diff, int numFiles){
             play_count = atoi(line);
             lookForFilename = 1;
 
-        if(lookForFilename && strncmp(line, "\t\t\t<key>Location</key>", 2) == 0)
+        if(lookForFilename && !strncmp(line, "\t\t\t<key>Location</key>", 2)){
             //extract filename        
-            filename =  "";
+            raw_filename = line;
+            char *p = strtok(line, "/");
+            while(p != "string>") {
+                raw_filename = p;
+                p = strtok(NULL, "/");//NULL paramater means use last string that was being tokenized
+            }
+
+            int charIdx = 0;
+            //cleanup: strip "%20" substrings and remove "<" char that is always at the end
+            while(charIdx < (sizeof(raw_filename) -1)){ 
+                //technically this could go out of bounds, but all well formed files should end in a file extension 
+                if(raw_filename[i] == '%' && raw_filename[i+1] == '2' && raw_filename[i] == '0'){
+                    filename[strlen(filename)] = " ";
+                    charIdx+=3;
+                }
+                else{
+                    filename[strlen(filename)] = raw_filename[i];
+                    charIdx++;
+                }
+            }
+
             printf("%s %s", play_count, filename);
 
             //now check for a matching music file and add it's play count if found
-            int i;
             for(i = 0; i < numFiles; i++){
                 if(!strcmp(filename, diff->music_files[i].filename)){
                     diff->music_files[i].playCount = play_count;
@@ -236,6 +258,7 @@ void set_playcount_mappings(filestate* diff, int numFiles){
             lookForFilename = 0;
 
         printf("%s", line);
+        }
     }
 
     if (line)
