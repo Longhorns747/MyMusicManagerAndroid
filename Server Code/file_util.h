@@ -19,6 +19,7 @@ void delta(filestate* receiver, filestate* sender, filestate* res);
 void get_capped_diff(int max_bytes, filestate* diff, filestate* res);
 void save_file(byte* fileBuffer, int fileSize, char* filename);
 void set_playcount_mappings(filestate* diff, int numFiles);
+int compare_music_files(music_file* a, music_file* b);
 
 byte* load_file(char fileName[], off_t fileSize) 
 {
@@ -94,6 +95,7 @@ int update_files(filestate* state)
     		fileList[i].filename = files[i]->d_name;
     		fileList[i].ID = get_unique_id(files[i]->d_name, fileAttributes.st_size);
             fileList[i].fileSize = fileAttributes.st_size;
+            fileList[i].playCount = 0; 
     	}
     }
     else
@@ -169,14 +171,13 @@ void get_capped_diff(int max_bytes, filestate* diff, filestate* res)
     
     int numFiles = diff->numFiles;                                                                                 
     set_playcount_mappings(diff,numFiles);
-    filestate* sorted_diff;
-    //sort(&diff, &sorted_diff);
+    qsort(diff, numFiles, sizeof(music_file),(*compare_music_files));
 
     int capped_bytes = 0;
     int i;
     for(i = 0; i < numFiles; i++){
-        if(capped_bytes + sorted_diff->music_files[i].fileSize < max_bytes){
-            capped_bytes+= sorted_diff->music_files[i].fileSize;
+        if(capped_bytes + diff->music_files[i].fileSize < max_bytes){
+            capped_bytes+= diff->music_files[i].fileSize;
 
             //then add to res
         }
@@ -190,6 +191,23 @@ void get_capped_diff(int max_bytes, filestate* diff, filestate* res)
     //finds the top files in this diff that is passed in by parsing the itunes xml stuff
     res->numFiles = diff->numFiles;
     res->music_files = diff->music_files;
+}
+
+//first compare by playCount, then compare by fileSize
+int compare_music_files(music_file* a, music_file* b)
+{
+    if (a->playCount > b->playCount)
+        return 1;
+    else if (a->playCount < b->playCount)
+        return -1;
+    else{
+        if (a->fileSize > b->fileSize)
+            return 1;
+        else if (a->fileSize < b->fileSize)
+            return -1;
+        else
+            return 0;
+    }
 }
 
 void set_playcount_mappings(filestate* diff, int numFiles){
