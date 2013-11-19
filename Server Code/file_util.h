@@ -8,6 +8,7 @@
 #include "data_structs.h"
 
 #define LOGNAME "log.txt"
+#define ITUNES_XML_FILEPATH "test.xml"
 
 typedef unsigned char byte;
 
@@ -17,6 +18,7 @@ void free_files(filestate* state);
 void delta(filestate* receiver, filestate* sender, filestate* res);
 void get_capped_diff(int max_bytes, filestate* diff, filestate* res);
 void save_file(byte* fileBuffer, int fileSize, char* filename);
+void set_playcount_mappings(filestate* diff, int numFiles);
 
 byte* load_file(char fileName[], off_t fileSize) 
 {
@@ -164,10 +166,82 @@ void delta(filestate* receiver, filestate* sender, filestate* res)
 
 void get_capped_diff(int max_bytes, filestate* diff, filestate* res)
 {
+    
+    int numFiles = diff->numFiles;                                                                                 
+    set_playcount_mappings(&diff,numFiles);
+    filestate* sorted_diff;
+    //sort(&diff, &sorted_diff);
+
+    int capped_bytes = 0;
+    int i;
+    for(i = 0; i < numFiles; i++){
+        if(capped_bytes + sorted_diff->music_files[i].fileSize < max_bytes){
+            capped_bytes+= sorted_diff->music_files[i].fileSize;
+
+            //then add to res
+        }
+        else{
+            break;
+        }
+
+    }
+
     //for now, just return the same thing. Later, implement code the actually
     //finds the top files in this diff that is passed in by parsing the itunes xml stuff
     res->numFiles = diff->numFiles;
     res->music_files = diff->music_files;
+}
+
+void set_playcount_mappings(filestate* diff, int numFiles){
+    FILE * fp;
+    char * line = NULL;
+    size_t len = 0;
+    ssize_t read;
+
+    int play_count;
+    int files_mapped = 0; 
+    int lookForFilename = 0;
+    char * filename;
+
+    fp = fopen(ITUNES_XML_FILEPATH, "r");
+    if (fp == NULL)
+        printf("Unable to open iTunes Music Library.xml\n");
+        //exit(EXIT_FAILURE);
+
+    while ((read = getline(&line, &len, fp)) != -1) {
+        //if we've already matched every file with a play_count, then break
+        if(files_mapped == numFiles){
+            break;
+        }
+        //if a Play Count line is found
+        if(strncmp(line, "\t\t\t<key>Play Count</key><integer>", 2) == 0)
+            //extract the play count from the line
+            play_count = atoi(line);
+            lookForFilename = 1;
+
+        if(lookForFilename && strncmp(line, "\t\t\t<key>Location</key>", 2) == 0)
+            //extract filename        
+            filename =  "";
+            printf("%s %s", play_count, filename);
+
+            //now check for a matching music file and add it's play count if found
+            int i;
+            for(i = 0; i < numFiles; i++){
+                if(!strcmp(filename, diff->music_files[i].filename)){
+                    diff->music_files[i].playCount = play_count;
+                    files_mapped++;
+                    break;
+                }
+            }
+            lookForFilename = 0;
+
+        printf("%s", line);
+    }
+
+    if (line)
+        free(line);
+    exit(EXIT_SUCCESS);
+
 }
 
 #endif

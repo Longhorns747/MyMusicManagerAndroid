@@ -19,6 +19,7 @@ typedef struct
 	char* filename;
 	unsigned char* ID;
 	int fileSize;
+	int playCount;
 } music_file;
 
 typedef struct
