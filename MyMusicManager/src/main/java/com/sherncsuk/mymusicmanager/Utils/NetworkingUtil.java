@@ -175,6 +175,9 @@ public class NetworkingUtil {
                 stringBuilder.append("File " + (i + 1) + " : " + filenames[i] + "\n");
             }
 
+            if(filenames.length == 0)
+                stringBuilder.append("All files are the same!");
+
             builder.setMessage(stringBuilder.toString());
             builder.setTitle("Files");
             (builder.create()).show();
