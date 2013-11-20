@@ -49,10 +49,20 @@ public class MainActivity extends Activity {
         currentContext = getApplicationContext();
     }
 
+    @Override
+    protected void onStop() {
+        leave(null);
+        super.onStop();
+    }
+
+    @Override
+    protected void onRestart() {
+        new NetworkConnection(this).execute();
+        super.onRestart();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
