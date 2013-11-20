@@ -244,15 +244,25 @@ public class NetworkingUtil {
                     //Receive the bytes of the file
                     int numBytes = currMessage.getNumBytes();
                     int j = 0;
-                    byte[] buff = new byte[1024];
+                    byte[] buff = new byte[2048];
                     FileOutputStream out = new FileOutputStream(musicFile);
 
-                    int bytesRead = 0;
+                    int bytesRead;
                     int totalBytesRead = 0;
+                    int bytesRemaining = currMessage.getNumBytes();
+
                     while (totalBytesRead < currMessage.getNumBytes()) {
-                        bytesRead = inputStream.read(buff, 0, buff.length);
+                        int bytesToReceive;
+
+                        if(bytesRemaining >= buff.length)
+                            bytesToReceive = buff.length;
+                        else
+                            bytesToReceive = bytesRemaining;
+
+                        bytesRead = inputStream.read(buff, 0, bytesToReceive);
                         out.write(buff, 0, bytesRead);
                         totalBytesRead += bytesRead;
+                        bytesRemaining -= bytesRead;
                     }
 
                     musicFile.createNewFile();
