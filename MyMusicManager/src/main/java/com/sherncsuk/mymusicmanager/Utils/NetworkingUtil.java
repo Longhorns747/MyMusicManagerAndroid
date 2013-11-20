@@ -274,13 +274,6 @@ public class NetworkingUtil {
                 e.printStackTrace();
             }
 
-            try{
-                inputStream.close();
-                byteStream.close();
-            } catch(IOException e){
-                e.printStackTrace();
-            }
-
             return res.toArray(new String[res.size()]);
         }
 
