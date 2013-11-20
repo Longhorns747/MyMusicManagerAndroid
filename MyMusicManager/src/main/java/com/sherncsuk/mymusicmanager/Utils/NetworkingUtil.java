@@ -3,6 +3,7 @@ package com.sherncsuk.mymusicmanager.Utils;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.ContactsContract;
@@ -199,10 +200,25 @@ public class NetworkingUtil {
     private class MusicFileReceiver extends AsyncTask<Socket, String, String[]> {
         Activity activity;
         File directory;
+        ProgressDialog pDialog;
 
         public MusicFileReceiver(Activity activity, File directory){
             this.activity = activity;
             this.directory = directory;
+        }
+
+        /**
+         * Sets up a progress dialog before the task is executed
+         */
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pDialog = new ProgressDialog(activity);
+            pDialog.setMessage("Receiving Files. Please wait...");
+            pDialog.setIndeterminate(false);
+            pDialog.setCancelable(false);
+            pDialog.show();
         }
 
         /**
@@ -284,6 +300,7 @@ public class NetworkingUtil {
 
         @Override
         protected void onPostExecute(String[] filenames) {
+            pDialog.dismiss();
             AlertDialog.Builder builder = new AlertDialog.Builder(activity);
             StringBuilder stringBuilder = new StringBuilder();
 

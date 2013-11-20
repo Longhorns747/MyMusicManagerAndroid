@@ -126,18 +126,20 @@ public class MainActivity extends Activity {
      */
 
     public void leave(View v){
-        sendInitialMessage(Message.MessageType.LEAVE);
+        if(connected){
+            sendInitialMessage(Message.MessageType.LEAVE);
 
-        try{
-            sock.close();
-            inputStream.close();
-            out.close();
-        } catch (IOException e){
-            e.printStackTrace();
+            try{
+                sock.close();
+                inputStream.close();
+                out.close();
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+
+            connected = false;
+            updateConnectedLabel(connected);
         }
-
-        connected = false;
-        updateConnectedLabel(connected);
     }
 
     /**
