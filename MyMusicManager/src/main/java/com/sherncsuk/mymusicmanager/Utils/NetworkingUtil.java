@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.provider.ContactsContract;
 
 import com.sherncsuk.mymusicmanager.DataStructures.Filestate;
 import com.sherncsuk.mymusicmanager.DataStructures.Message;
@@ -14,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -180,6 +182,117 @@ public class NetworkingUtil {
 
             builder.setMessage(stringBuilder.toString());
             builder.setTitle("Files");
+            (builder.create()).show();
+        }
+    }
+
+    /**
+     * A method that recieves the filenames of all music files on the server
+     * @param activity
+     * @param sock
+     */
+
+    public void receiveMusicFiles(Activity activity, File directory, Socket sock){
+        new MusicFileReceiver(activity, directory).execute(sock);
+    }
+
+    private class MusicFileReceiver extends AsyncTask<Socket, String, String[]> {
+        Activity activity;
+        File directory;
+
+        public MusicFileReceiver(Activity activity, File directory){
+            this.activity = activity;
+            this.directory = directory;
+        }
+
+        /**
+         * Recieves filenames on a seperate thread from the UI
+         * @param sock
+         * @return
+         */
+
+        @TargetApi(Build.VERSION_CODES.GINGERBREAD)
+        @Override
+        protected String[] doInBackground(Socket... sock) {
+            ArrayList<String> res = new ArrayList<String>();
+            Message currMessage = receiveMessage(sock[0]);
+            DataInputStream inputStream = null;
+            ByteArrayOutputStream byteStream = null;
+
+            try {
+                inputStream = new DataInputStream(sock[0].getInputStream());
+                byteStream = new ByteArrayOutputStream();
+
+                //Keep receiving messages until we hit the last message
+                while(currMessage.isLastMessage() == Message.MessageType.NOT_LAST.getVal()){
+
+                    //Receive the bytes of the filename
+                    int i = 0;
+                    while(i < currMessage.getFilenameLength()){
+                        int retData = inputStream.readUnsignedByte();
+                        byteStream.write(retData);
+                        i++;
+                    }
+
+                    byte result[] = Arrays.copyOf(byteStream.toByteArray(), currMessage.getFilenameLength());
+                    byteStream.reset();
+                    res.add(new String(result));
+
+                    String filepath = directory.getAbsolutePath() + "/" + new String(result);
+                    File musicFile = new File(filepath);
+
+                    //Receive the bytes of the file
+                    int numBytes = currMessage.getNumBytes();
+                    int j = 0;
+                    byte[] buff = new byte[1024];
+                    FileOutputStream out = new FileOutputStream(musicFile);
+
+                    int bytesRead = 0;
+                    int totalBytesRead = 0;
+                    while (totalBytesRead < currMessage.getNumBytes()) {
+                        bytesRead = inputStream.read(buff, 0, buff.length);
+                        out.write(buff, 0, bytesRead);
+                        totalBytesRead += bytesRead;
+                    }
+
+                    musicFile.createNewFile();
+                    out.close();
+
+                    currMessage = receiveMessage(sock[0]);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            try{
+                inputStream.close();
+                byteStream.close();
+            } catch(IOException e){
+                e.printStackTrace();
+            }
+
+            return res.toArray(new String[res.size()]);
+        }
+
+        /**
+         * Displays the received filenames in a dialog box
+         * @param filenames
+         */
+
+        @Override
+        protected void onPostExecute(String[] filenames) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+            StringBuilder stringBuilder = new StringBuilder();
+
+            for(int i = 0; i < filenames.length; i++){
+                stringBuilder.append("File " + (i + 1) + " : " + filenames[i] + "\n");
+            }
+
+            if(filenames.length == 0)
+                stringBuilder.append("All files are the same!");
+
+            builder.setMessage(stringBuilder.toString());
+            builder.setTitle("Received Files");
             (builder.create()).show();
         }
     }

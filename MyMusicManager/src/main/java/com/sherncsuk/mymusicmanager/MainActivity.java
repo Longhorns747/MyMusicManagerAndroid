@@ -99,9 +99,15 @@ public class MainActivity extends Activity {
      * @param v
      */
 
+    @TargetApi(Build.VERSION_CODES.FROYO)
     public void pull(View v){
-        if(connected)
+        if(connected){
             sendInitialMessage(Message.MessageType.PULL);
+            File currDirectory = currentContext.getExternalFilesDir(null);
+            Filestate currState = updateFiles(currentContext);
+            networkingUtil.sendIDs(currState, sock);
+            networkingUtil.receiveMusicFiles(this, currDirectory, sock);
+        }
     }
 
     /**
