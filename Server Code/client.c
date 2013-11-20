@@ -13,11 +13,16 @@ void diff(int sock);
 
 int main()
 {
-	int userChoice = 1;
+
+	//TEST_PARSING_LOGIC();
+
+	int userChoice = 0;
 
 	//Set up a connection to the server
 	sockaddr_in serverAddr;
-	setup_addr("130.207.114.21", &serverAddr);
+	//setup_addr("130.207.114.21", &serverAddr);
+	setup_addr("127.0.0.1", &serverAddr);
+	
 	int sock = setup_connection(&serverAddr);
 
 	printf("Connection to server established\n");
