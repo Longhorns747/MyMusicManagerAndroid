@@ -103,7 +103,7 @@ public class MainActivity extends Activity {
     public void pull(View v){
         if(connected){
             sendInitialMessage(Message.MessageType.PULL);
-            File currDirectory = currentContext.getExternalFilesDir(null);
+            File currDirectory = currentContext.getExternalFilesDir(Environment.DIRECTORY_MUSIC);
             Filestate currState = updateFiles(currentContext);
             networkingUtil.sendIDs(currState, sock);
             networkingUtil.receiveMusicFiles(this, currDirectory, sock);
@@ -230,7 +230,7 @@ public class MainActivity extends Activity {
             return null;
         }
 
-        File currDirectory = currContext.getExternalFilesDir(null);
+        File currDirectory = currContext.getExternalFilesDir(Environment.DIRECTORY_MUSIC);
         File[] fileList = currDirectory.listFiles();
         ArrayList<MusicFile> musicFiles = new ArrayList<MusicFile>();
 
