@@ -170,12 +170,12 @@ void delta(filestate* receiver, filestate* sender, filestate* res)
 void get_capped_diff(int max_bytes, filestate* diff, filestate* res)
 {
     int numFiles = diff->numFiles;                                                                                 
-    set_playcount_mappings(diff,numFiles);
+    set_playcount_mappings(diff, numFiles);
     qsort(diff->music_files, numFiles, sizeof(music_file),(*compare_music_files));
 
     int capped_bytes = 0;
-    int i;
     int capped_files = 0;
+    int i;
     for(i = 0; i < numFiles; i++){
         if(capped_bytes + diff->music_files[i].fileSize < max_bytes){
             capped_bytes+= diff->music_files[i].fileSize;
@@ -187,8 +187,14 @@ void get_capped_diff(int max_bytes, filestate* diff, filestate* res)
 
     }
 
+    music_file *capped_file_list;
+    fileList=(music_file*) malloc(capped_files * sizeof(music_file));
+    for(i = 0; i < capped_files; i++){
+        capped_file_list[i] = diff->music_files[i];
+    }
+    
     res->numFiles = capped_files;
-    res->music_files = diff->music_files;//find out how to remove end part of this array
+    res->music_files = diff->capped_file_list;//find out how to remove end part of this array
 }
 
 //first compare by playCount, then compare by fileSize
@@ -344,8 +350,8 @@ void set_playcount_mappings(filestate* diff, int numFiles){
     
     fp = fopen(ITUNES_XML_FILEPATH, "r");
     if (fp == NULL)
-        printf("Unable to open iTunes Music Library.xml\n");
-        //return;
+        printf("Unable to open iTunes Music Library.xml. Mappings will not be added. Make sure it is in the working directory\n");
+        return;
         //exit(EXIT_FAILURE);
 
     while ((read = getline(&line, &len, fp)) != -1) {
@@ -373,7 +379,7 @@ void set_playcount_mappings(filestate* diff, int numFiles){
             int charIdx = 0;
             int spaces = 0;
             //cleanup: strip "%20" substrings and remove "<" char that is always at the end.
-            //First find the length of the new string
+            //First find what the length of the new string will be after cleanup 
             while(charIdx < (strlen(raw_filename) -1)){ 
                 //technically this could go out of bounds, but all well formed files should end in a file extension 
                 if(raw_filename[charIdx] == '%' && raw_filename[charIdx+1] == '2' && raw_filename[charIdx+2] == '0'){
@@ -407,11 +413,13 @@ void set_playcount_mappings(filestate* diff, int numFiles){
                     break;
                 }
             }
-            playCountFound = 0;
+            playCountFound = 0; 
         }
         
     }
  
+    printf("%d files were mapped to playcounts\n", files_mapped);
+
     if (line)
         free(line);
     exit(EXIT_SUCCESS);
