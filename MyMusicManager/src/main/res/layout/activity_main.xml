@@ -88,4 +88,12 @@
             android:id="@+id/RECONNECT"
             android:layout_gravity="center_horizontal" />
     </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="ConnectedState"
+        android:id="@+id/connectedState"
+        android:layout_gravity="center_horizontal" />
 </LinearLayout>

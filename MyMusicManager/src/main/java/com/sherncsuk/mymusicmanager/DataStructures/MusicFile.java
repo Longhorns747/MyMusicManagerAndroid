@@ -32,30 +32,39 @@ public class MusicFile {
      */
 
     private byte[] generateID(File musicFile){
-        MessageDigest md = null;
-
-        try{
-             md = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e){
-            e.printStackTrace();
-        }
-
         try {
             InputStream in = new FileInputStream(musicFile);
-            DigestInputStream dis = new DigestInputStream(in, md);
-            int currByte = dis.read();
+            int filesize = 0;
 
-            while(currByte != -1){
-                currByte = dis.read();
-            }
+            //Seems as though when I make the buffer bigger, it goes faster :O
+            if(musicFile.length() < Integer.MAX_VALUE)
+                filesize = (int)musicFile.length(); //Let's make it as big as the file!
+            else
+                filesize = Integer.MAX_VALUE;
 
+            byte[] buffer = new byte[filesize];
+            MessageDigest complete = MessageDigest.getInstance("MD5");
+            int numRead;
+
+            do {
+                numRead = in.read(buffer);
+                if (numRead > 0) {
+                    complete.update(buffer, 0, numRead);
+                }
+            } while (numRead != -1);
+
+            in.close();
+            return complete.digest();
+
+        } catch (NoSuchAlgorithmException e){
+            e.printStackTrace();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return md.digest();
+        return null;
     }
 
     public String getFilename() {
