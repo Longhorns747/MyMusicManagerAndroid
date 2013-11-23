@@ -2,12 +2,15 @@ package com.sherncsuk.mymusicmanager.Activities;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.Menu;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.sherncsuk.mymusicmanager.DataStructures.Filestate;
@@ -115,11 +118,33 @@ public class MainActivity extends Activity {
     @TargetApi(Build.VERSION_CODES.FROYO)
     public void cap(View v){
         if(connected){
-            networkingUtil.sendInitialMessage(sock, Message.MessageType.CAP, 10);
-            File currDirectory = currentContext.getExternalFilesDir(Environment.DIRECTORY_MUSIC);
-            Filestate currState = fileUtil.updateFiles(currentContext);
-            networkingUtil.sendIDs(currState, sock);
-            networkingUtil.receiveMusicFiles(this, currDirectory, sock);
+            AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+            alert.setTitle("Cap");
+            alert.setMessage("Enter Cap in MB");
+
+            // Set an EditText view to get user input
+            final EditText input = new EditText(this);
+            alert.setView(input);
+
+            alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    int numBytes = Integer.parseInt(input.getText().toString()) * 1048576;
+                    networkingUtil.sendInitialMessage(sock, Message.MessageType.CAP, numBytes);
+                    File currDirectory = currentContext.getExternalFilesDir(Environment.DIRECTORY_MUSIC);
+                    Filestate currState = fileUtil.updateFiles(currentContext);
+                    networkingUtil.sendIDs(currState, sock);
+                    networkingUtil.receiveMusicFiles(MainActivity.this, currDirectory, sock);
+                }
+            });
+
+            alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    // Canceled.
+                }
+            });
+
+            alert.show();
         }
     }
 
