@@ -173,6 +173,10 @@ public class MainActivity extends Activity {
             ((TextView)findViewById(R.id.connectedState)).setText("Not Connected :(");
     }
 
+    /**
+     * Standard getters and setters
+     */
+
     public Socket getSock() {
         return sock;
     }

@@ -381,6 +381,11 @@ public class NetworkingUtil {
         return value;
     }
 
+    /**
+     * Connect to the server
+     * @param activity
+     */
+
     public void connect(MainActivity activity){
         new NetworkConnection(activity).execute();
     }

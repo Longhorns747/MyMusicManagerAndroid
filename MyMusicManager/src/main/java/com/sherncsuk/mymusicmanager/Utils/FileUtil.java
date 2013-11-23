@@ -17,6 +17,7 @@ import java.util.ArrayList;
  * Version: 1.0
  */
 public class FileUtil {
+
     /**
      * A helper method to scan the directory with our music files and update the filestate
      * @param currContext

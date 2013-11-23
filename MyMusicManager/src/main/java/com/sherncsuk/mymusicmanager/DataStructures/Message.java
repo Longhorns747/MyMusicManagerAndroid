@@ -19,36 +19,6 @@ import java.util.Arrays;
  */
 
 public class Message {
-    public enum MessageType {
-        LEAVE(0), LIST(1), PULL(2), DIFF(3), CAP(4), LAST_MESSAGE(1), NOT_LAST(0);
-
-        private int val;
-
-        private MessageType(int val){
-            this.val = val;
-        }
-
-        public int getVal(){
-            return val;
-        }
-
-        public static MessageType getType(int val){
-            switch(val){
-                case 0:
-                    return LEAVE;
-                case 1:
-                    return LIST;
-                case 2:
-                    return PULL;
-                case 3:
-                    return DIFF;
-                case 4:
-                    return CAP;
-            }
-
-            return null;
-        }
-    }
 
     private MessageType type;
     private int numBytes;
@@ -106,6 +76,37 @@ public class Message {
 
     public void setMaxBytes(int maxBytes) {
         this.maxBytes = maxBytes;
+    }
+
+    public enum MessageType {
+        LEAVE(0), LIST(1), PULL(2), DIFF(3), CAP(4), LAST_MESSAGE(1), NOT_LAST(0);
+
+        private int val;
+
+        private MessageType(int val){
+            this.val = val;
+        }
+
+        public int getVal(){
+            return val;
+        }
+
+        public static MessageType getType(int val){
+            switch(val){
+                case 0:
+                    return LEAVE;
+                case 1:
+                    return LIST;
+                case 2:
+                    return PULL;
+                case 3:
+                    return DIFF;
+                case 4:
+                    return CAP;
+            }
+
+            return null;
+        }
     }
 
 }
