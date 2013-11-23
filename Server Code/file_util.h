@@ -9,6 +9,8 @@
 
 #define LOGNAME "log.txt"
 #define ITUNES_XML_FILEPATH "it.xml"
+//#define ITUNES_XML_FILEPATH "iTunes Music Library.xml" //MUST BE IN WORKING DIR
+
 
 typedef unsigned char byte;
 
@@ -184,17 +186,17 @@ void get_capped_diff(int max_bytes, filestate* diff, filestate* res)
         else{
             break;
         }
-
     }
 
+    //Is there a better way to do this? Just trying to use the first n music files in the sorted list 
     music_file *capped_file_list;
-    fileList=(music_file*) malloc(capped_files * sizeof(music_file));
+    capped_file_list = (music_file*) malloc(capped_files * sizeof(music_file));
     for(i = 0; i < capped_files; i++){
         capped_file_list[i] = diff->music_files[i];
     }
-    
+
     res->numFiles = capped_files;
-    res->music_files = diff->capped_file_list;//find out how to remove end part of this array
+    res->music_files = capped_file_list;
 }
 
 //first compare by playCount, then compare by fileSize
@@ -204,7 +206,7 @@ int compare_music_files(music_file* a, music_file* b)
         return 1;
     else if (a->playCount < b->playCount)
         return -1;
-    else{
+    else{//playCounts are the same, perhaps both 0
         if (a->fileSize > b->fileSize)
             return 1;
         else if (a->fileSize < b->fileSize)
@@ -334,7 +336,7 @@ void TEST_PARSING_LOGIC(){
 
 
 void set_playcount_mappings(filestate* diff, int numFiles){
-    printf("Setting playcount mappings from itunes xml file\n");  
+    printf("Setting playcount mappings from iTunes Music Library.xml\n");  
 
     FILE * fp;
     char * line = NULL;
@@ -350,9 +352,10 @@ void set_playcount_mappings(filestate* diff, int numFiles){
     
     fp = fopen(ITUNES_XML_FILEPATH, "r");
     if (fp == NULL)
-        printf("Unable to open iTunes Music Library.xml. Mappings will not be added. Make sure it is in the working directory\n");
+        printf("Unable to open or find iTunes Music Library.xml. Mappings will not be added. Ensure it is in the working directory\n");
         return;
         //exit(EXIT_FAILURE);
+        //returning will 
 
     while ((read = getline(&line, &len, fp)) != -1) {
         
@@ -391,6 +394,7 @@ void set_playcount_mappings(filestate* diff, int numFiles){
                 }
             }
 
+            //String length minus 1 for the "<" and - 2 per safe 
             char filename[strlen(raw_filename) - 1 - (spaces*2)];
             charIdx = 0;
             i = 0;
