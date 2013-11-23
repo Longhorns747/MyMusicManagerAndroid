@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.sherncsuk.mymusicmanager.DataStructures.Filestate;
 import com.sherncsuk.mymusicmanager.DataStructures.Message;
 import com.sherncsuk.mymusicmanager.DataStructures.MusicFile;
+import com.sherncsuk.mymusicmanager.Utils.FileUtil;
 import com.sherncsuk.mymusicmanager.Utils.NetworkingUtil;
 
 import java.io.ByteArrayOutputStream;
@@ -32,20 +33,21 @@ public class MainActivity extends Activity {
     private Socket sock;
     private OutputStream out;
     private DataInputStream inputStream;
-    private ByteArrayOutputStream byteStream;
     private boolean connected = false;
     private Context currentContext;
 
     //Utilities
     private NetworkingUtil networkingUtil;
+    private FileUtil fileUtil;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        new NetworkConnection(this).execute();
 
         networkingUtil = new NetworkingUtil();
+        networkingUtil.connect(this);
+        fileUtil = new FileUtil();
         currentContext = getApplicationContext();
     }
 
@@ -57,7 +59,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onRestart() {
-        new NetworkConnection(this).execute();
+        networkingUtil.connect(this);
         super.onRestart();
     }
 
@@ -75,7 +77,7 @@ public class MainActivity extends Activity {
 
     public void list(View v){
         if(connected){
-            sendInitialMessage(Message.MessageType.LIST);
+            networkingUtil.sendInitialMessage(sock, Message.MessageType.LIST);
             networkingUtil.recieveFilenames(this, sock);
         }
     }
@@ -87,8 +89,8 @@ public class MainActivity extends Activity {
 
     public void diff(View v){
         if(connected){
-            sendInitialMessage(Message.MessageType.DIFF);
-            Filestate currentState = updateFiles(currentContext);
+            networkingUtil.sendInitialMessage(sock, Message.MessageType.DIFF);
+            Filestate currentState = fileUtil.updateFiles(currentContext);
             networkingUtil.sendIDs(currentState, sock);
             networkingUtil.recieveFilenames(this, sock);
         }
@@ -102,9 +104,9 @@ public class MainActivity extends Activity {
     @TargetApi(Build.VERSION_CODES.FROYO)
     public void pull(View v){
         if(connected){
-            sendInitialMessage(Message.MessageType.PULL);
+            networkingUtil.sendInitialMessage(sock, Message.MessageType.PULL);
             File currDirectory = currentContext.getExternalFilesDir(Environment.DIRECTORY_MUSIC);
-            Filestate currState = updateFiles(currentContext);
+            Filestate currState = fileUtil.updateFiles(currentContext);
             networkingUtil.sendIDs(currState, sock);
             networkingUtil.receiveMusicFiles(this, currDirectory, sock);
         }
@@ -115,9 +117,15 @@ public class MainActivity extends Activity {
      * @param v
      */
 
+    @TargetApi(Build.VERSION_CODES.FROYO)
     public void cap(View v){
-        if(connected)
-            sendInitialMessage(Message.MessageType.CAP);
+        if(connected){
+            networkingUtil.sendInitialMessage(sock, Message.MessageType.CAP, 10);
+            File currDirectory = currentContext.getExternalFilesDir(Environment.DIRECTORY_MUSIC);
+            Filestate currState = fileUtil.updateFiles(currentContext);
+            networkingUtil.sendIDs(currState, sock);
+            networkingUtil.receiveMusicFiles(this, currDirectory, sock);
+        }
     }
 
     /**
@@ -127,7 +135,7 @@ public class MainActivity extends Activity {
 
     public void leave(View v){
         if(connected){
-            sendInitialMessage(Message.MessageType.LEAVE);
+            networkingUtil.sendInitialMessage(sock, Message.MessageType.LEAVE);
 
             try{
                 sock.close();
@@ -149,105 +157,8 @@ public class MainActivity extends Activity {
 
     public void reconnect(View v){
         if(!connected){
-            new NetworkConnection(this).execute();
+            networkingUtil.connect(this);
         }
-    }
-
-    /**
-     * Sends the initial control message to the server
-     * @param type
-     */
-
-    public void sendInitialMessage(Message.MessageType type){
-        Message initialMessage = new Message(0, type,
-                Message.MessageType.LAST_MESSAGE.getVal(), 0, 0);
-        NetworkingUtil.sendMessage(sock, initialMessage);
-    }
-
-    /**
-     * A private inner class to help set up the connection to the server on a different thread
-     */
-
-    private class NetworkConnection extends AsyncTask<String, String, String> {
-        private MainActivity activity;
-
-        public NetworkConnection(MainActivity activity){
-            this.activity = activity;
-        }
-
-        @Override
-        protected String doInBackground(String[] strings) {
-            try {
-                sock = new Socket("130.207.114.21", 2223);
-            } catch (UnknownHostException e) {
-                connected = false;
-                e.printStackTrace();
-                return null;
-            } catch (IOException e) {
-                connected = false;
-                e.printStackTrace();
-                return null;
-            }
-
-            connected = true;
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String str) {
-            if(connected){
-                try {
-                    out = sock.getOutputStream();
-                    inputStream = new DataInputStream(sock.getInputStream());
-                    byteStream = new ByteArrayOutputStream();
-                } catch (IOException e){
-                    e.printStackTrace();
-                }
-            }
-            else{
-                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-                builder.setMessage("Couldn't connect to the server :(\nSlap Ethan!");
-                (builder.create()).show();
-            }
-
-            updateConnectedLabel(connected);
-        }
-    }
-
-    /**
-     * A helper method to scan the directory with our music files and update the filestate
-     * @param currContext
-     * @return currentFileState
-     */
-
-    @TargetApi(Build.VERSION_CODES.FROYO)
-    public Filestate updateFiles(Context currContext){
-        String state = Environment.getExternalStorageState();
-
-        //Check to make sure the external storage is writable
-        if (!Environment.MEDIA_MOUNTED.equals(state)) {
-            // We can read and write the media
-            return null;
-        }
-
-        File currDirectory = currContext.getExternalFilesDir(Environment.DIRECTORY_MUSIC);
-        File[] fileList = currDirectory.listFiles();
-        ArrayList<MusicFile> musicFiles = new ArrayList<MusicFile>();
-
-        for(File file: fileList){
-            String extension = "";
-
-            int i = file.getName().lastIndexOf('.');
-            if (i > 0) {
-                extension = file.getName().substring(i + 1);
-            }
-
-            if(extension.equals("mp3")){
-                musicFiles.add(new MusicFile(file.getName(), file));
-            }
-        }
-
-        return new Filestate(musicFiles.size(), musicFiles.toArray(new MusicFile[musicFiles.size()]));
     }
 
     /**
@@ -260,5 +171,29 @@ public class MainActivity extends Activity {
             ((TextView)findViewById(R.id.connectedState)).setText("Connected!");
         else
             ((TextView)findViewById(R.id.connectedState)).setText("Not Connected :(");
+    }
+
+    public Socket getSock() {
+        return sock;
+    }
+
+    public void setSock(Socket sock) {
+        this.sock = sock;
+    }
+
+    public void setOut(OutputStream out) {
+        this.out = out;
+    }
+
+    public void setInputStream(DataInputStream inputStream) {
+        this.inputStream = inputStream;
+    }
+
+    public void setConnected(boolean connected) {
+        this.connected = connected;
+    }
+
+    public boolean getConnected() {
+        return connected;
     }
 }

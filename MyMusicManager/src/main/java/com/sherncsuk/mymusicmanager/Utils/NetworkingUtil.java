@@ -11,6 +11,7 @@ import android.provider.ContactsContract;
 import com.sherncsuk.mymusicmanager.DataStructures.Filestate;
 import com.sherncsuk.mymusicmanager.DataStructures.Message;
 import com.sherncsuk.mymusicmanager.DataStructures.MusicFile;
+import com.sherncsuk.mymusicmanager.MainActivity;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -20,6 +21,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -29,6 +31,21 @@ import java.util.Arrays;
  * Version: 1.0
  */
 public class NetworkingUtil {
+
+    /**
+     * Sends the initial control message to the server
+     * @param type
+     */
+
+    public void sendInitialMessage(Socket sock, Message.MessageType type){
+        sendInitialMessage(sock, type, 0);
+    }
+
+    public void sendInitialMessage(Socket sock, Message.MessageType type, int cap){
+        Message initialMessage = new Message(0, type,
+                Message.MessageType.LAST_MESSAGE.getVal(), 0, cap);
+        NetworkingUtil.sendMessage(sock, initialMessage);
+    }
 
     /**
      * A static helper method to send a message
@@ -362,6 +379,59 @@ public class NetworkingUtil {
             value += (b[i] & 0x000000FF) << shift;
         }
         return value;
+    }
+
+    public void connect(MainActivity activity){
+        new NetworkConnection(activity).execute();
+    }
+
+    /**
+     * A private inner class to help set up the connection to the server on a different thread
+     */
+
+    private class NetworkConnection extends AsyncTask<String, String, String> {
+        private MainActivity activity;
+
+        public NetworkConnection(MainActivity activity){
+            this.activity = activity;
+        }
+
+        @Override
+        protected String doInBackground(String[] strings) {
+            try {
+                activity.setSock(new Socket("130.207.114.21", 2223));
+            } catch (UnknownHostException e) {
+                activity.setConnected(false);
+                e.printStackTrace();
+                return null;
+            } catch (IOException e) {
+                activity.setConnected(false);
+                e.printStackTrace();
+                return null;
+            }
+
+            activity.setConnected(true);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String str) {
+            if(activity.getConnected()){
+                try {
+                    activity.setOut(activity.getSock().getOutputStream());
+                    activity.setInputStream(new DataInputStream(activity.getSock().getInputStream()));
+                } catch (IOException e){
+                    e.printStackTrace();
+                }
+            }
+            else{
+                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                builder.setMessage("Couldn't connect to the server :(\nSlap Ethan!");
+                (builder.create()).show();
+            }
+
+            activity.updateConnectedLabel(activity.getConnected());
+        }
     }
 
 }
