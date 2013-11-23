@@ -6,12 +6,11 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.provider.ContactsContract;
 
 import com.sherncsuk.mymusicmanager.DataStructures.Filestate;
 import com.sherncsuk.mymusicmanager.DataStructures.Message;
 import com.sherncsuk.mymusicmanager.DataStructures.MusicFile;
-import com.sherncsuk.mymusicmanager.MainActivity;
+import com.sherncsuk.mymusicmanager.Activities.MainActivity;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;

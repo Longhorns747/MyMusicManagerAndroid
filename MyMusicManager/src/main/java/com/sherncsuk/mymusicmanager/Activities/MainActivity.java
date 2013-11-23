@@ -1,10 +1,8 @@
-package com.sherncsuk.mymusicmanager;
+package com.sherncsuk.mymusicmanager.Activities;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -14,18 +12,15 @@ import android.widget.TextView;
 
 import com.sherncsuk.mymusicmanager.DataStructures.Filestate;
 import com.sherncsuk.mymusicmanager.DataStructures.Message;
-import com.sherncsuk.mymusicmanager.DataStructures.MusicFile;
+import com.sherncsuk.mymusicmanager.R;
 import com.sherncsuk.mymusicmanager.Utils.FileUtil;
 import com.sherncsuk.mymusicmanager.Utils.NetworkingUtil;
 
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
 
 public class MainActivity extends Activity {
 
@@ -168,9 +163,9 @@ public class MainActivity extends Activity {
 
     public void updateConnectedLabel(boolean connected){
         if(connected)
-            ((TextView)findViewById(R.id.connectedState)).setText("Connected!");
+            ((TextView)findViewById(R.id.connectedState)).setText(R.string.connected);
         else
-            ((TextView)findViewById(R.id.connectedState)).setText("Not Connected :(");
+            ((TextView)findViewById(R.id.connectedState)).setText(R.string.not_connected);
     }
 
     /**
