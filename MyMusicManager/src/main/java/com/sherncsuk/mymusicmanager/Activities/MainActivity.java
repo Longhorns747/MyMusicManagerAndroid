@@ -106,7 +106,7 @@ public class MainActivity extends Activity {
             File currDirectory = currentContext.getExternalFilesDir(Environment.DIRECTORY_MUSIC);
             Filestate currState = fileUtil.updateFiles(currentContext);
             networkingUtil.sendIDs(currState, sock);
-            networkingUtil.receiveMusicFiles(this, currDirectory, sock);
+            networkingUtil.receiveMusicFiles(this, currDirectory, sock, Message.MessageType.PULL);
         }
     }
 
@@ -134,7 +134,7 @@ public class MainActivity extends Activity {
                     File currDirectory = currentContext.getExternalFilesDir(Environment.DIRECTORY_MUSIC);
                     Filestate currState = fileUtil.updateFiles(currentContext);
                     networkingUtil.sendIDs(currState, sock);
-                    networkingUtil.receiveMusicFiles(MainActivity.this, currDirectory, sock);
+                    networkingUtil.receiveMusicFiles(MainActivity.this, currDirectory, sock, Message.MessageType.CAP);
                 }
             });
 
