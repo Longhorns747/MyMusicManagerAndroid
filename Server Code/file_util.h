@@ -8,7 +8,7 @@
 #include "data_structs.h"
 
 #define LOGNAME "log.txt"
-#define ITUNES_XML_FILEPATH "it.xml"
+#define ITUNES_XML_FILEPATH "iTunes\ Music\ Library.xml"
 //#define ITUNES_XML_FILEPATH "iTunes Music Library.xml" //MUST BE IN WORKING DIR
 
 
@@ -173,26 +173,34 @@ void get_capped_diff(int max_bytes, filestate* diff, filestate* res)
 {
     int numFiles = diff->numFiles;                                                                                 
     set_playcount_mappings(diff, numFiles);
+    printf("Playcounts have been set\n");
+
+    for (int i = 0; i < numFiles; ++i)
+    {
+        printf("1 Filename:%s, PC: %d, MB: %d\n",diff->music_files[i].filename, diff->music_files[i].playCount, diff->music_files[i].fileSize);
+    }
+
     qsort(diff->music_files, numFiles, sizeof(music_file),(*compare_music_files));
+
+    for (int i = 0; i < numFiles; ++i)
+    {
+        printf("2 Filename:%s, PC: %d, MB: %d\n",diff->music_files[i].filename, diff->music_files[i].playCount, diff->music_files[i].fileSize);
+    }
+
+
+    printf("Files have been sorted\n");
 
     int capped_bytes = 0;
     int capped_files = 0;
     int i;
+    music_file *capped_file_list ;
+    capped_file_list = (music_file*) malloc(sizeof(music_file));
     for(i = 0; i < numFiles; i++){
         if(capped_bytes + diff->music_files[i].fileSize < max_bytes){
             capped_bytes+= diff->music_files[i].fileSize;
-            capped_files++;
+            capped_file_list = (music_file*) realloc(capped_file_list, sizeof(music_file)*(++capped_files));
+            capped_file_list[capped_files -1] = diff->music_files[i];
         }
-        else{
-            break;
-        }
-    }
-
-    //Is there a better way to do this? Just trying to use the first n music files in the sorted list 
-    music_file *capped_file_list;
-    capped_file_list = (music_file*) malloc(capped_files * sizeof(music_file));
-    for(i = 0; i < capped_files; i++){
-        capped_file_list[i] = diff->music_files[i];
     }
 
     res->numFiles = capped_files;
@@ -202,17 +210,31 @@ void get_capped_diff(int max_bytes, filestate* diff, filestate* res)
 //first compare by playCount, then compare by fileSize
 int compare_music_files(music_file* a, music_file* b)
 {
-    if (a->playCount > b->playCount)
-        return 1;
-    else if (a->playCount < b->playCount)
+    printf("PCA: %d, PCB: %d\n", a->playCount, b->playCount);
+    if (a->playCount > b->playCount){
+        printf("one\n");
         return -1;
+    }
+    else if (a->playCount < b->playCount){
+          printf("two\n");
+        return 1;
+    }
     else{//playCounts are the same, perhaps both 0
-        if (a->fileSize > b->fileSize)
+        if (a->fileSize > b->fileSize){
+
+            printf("three\n");
             return 1;
-        else if (a->fileSize < b->fileSize)
+        }
+        else if (a->fileSize < b->fileSize){
+
+
+              printf("four\n");
             return -1;
-        else
+        }
+        else{
+            printf("five\n");
             return 0;
+        }
     }
 }
 
@@ -351,11 +373,14 @@ void set_playcount_mappings(filestate* diff, int numFiles){
     int i;
     
     fp = fopen(ITUNES_XML_FILEPATH, "r");
-    if (fp == NULL)
+    if (fp == NULL){
         printf("Unable to open or find iTunes Music Library.xml. Mappings will not be added. Ensure it is in the working directory\n");
         return;
-        //exit(EXIT_FAILURE);
-        //returning will 
+    }
+    //exit(EXIT_FAILURE);
+    //returning will 
+
+    printf("Num files: %d\n", numFiles);
 
     while ((read = getline(&line, &len, fp)) != -1) {
         
@@ -394,6 +419,8 @@ void set_playcount_mappings(filestate* diff, int numFiles){
                 }
             }
 
+
+
             //String length minus 1 for the "<" and - 2 per safe 
             char filename[strlen(raw_filename) - 1 - (spaces*2)];
             charIdx = 0;
@@ -426,7 +453,7 @@ void set_playcount_mappings(filestate* diff, int numFiles){
 
     if (line)
         free(line);
-    exit(EXIT_SUCCESS);
+    //exit(EXIT_SUCCESS);
 }
 
 #endif
