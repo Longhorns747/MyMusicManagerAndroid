@@ -195,7 +195,7 @@ public class NetworkingUtil {
             }
 
             if(filenames.length == 0)
-                stringBuilder.append("All files are the same!");
+                stringBuilder.append("All files are sync'd :D!");
 
             builder.setMessage(stringBuilder.toString());
             builder.setTitle("Files");
@@ -209,18 +209,23 @@ public class NetworkingUtil {
      * @param sock
      */
 
-    public void receiveMusicFiles(Activity activity, File directory, Socket sock){
-        new MusicFileReceiver(activity, directory).execute(sock);
+    public void receiveMusicFiles(Activity activity, File directory, Socket sock, Message.MessageType type){
+        if(type == Message.MessageType.CAP)
+            new MusicFileReceiver(activity, directory, "CAP too small to receive files D:!").execute(sock);
+        else
+            new MusicFileReceiver(activity, directory, "All files are sync'd :D!").execute(sock);
     }
 
     private class MusicFileReceiver extends AsyncTask<Socket, String, String[]> {
         Activity activity;
         File directory;
         ProgressDialog pDialog;
+        String message;
 
-        public MusicFileReceiver(Activity activity, File directory){
+        public MusicFileReceiver(Activity activity, File directory, String message){
             this.activity = activity;
             this.directory = directory;
+            this.message = message;
         }
 
         /**
@@ -325,7 +330,7 @@ public class NetworkingUtil {
             }
 
             if(filenames.length == 0)
-                stringBuilder.append("All files are the same!");
+                stringBuilder.append(message);
 
             builder.setMessage(stringBuilder.toString());
             builder.setTitle("Received Files");
