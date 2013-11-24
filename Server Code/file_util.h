@@ -11,7 +11,6 @@
 #define ITUNES_XML_FILEPATH "iTunes\ Music\ Library.xml"
 //#define ITUNES_XML_FILEPATH "iTunes Music Library.xml" //MUST BE IN WORKING DIR
 
-
 typedef unsigned char byte;
 
 int alphasort(const struct dirent ** a, const struct dirent **b);
@@ -22,7 +21,6 @@ void get_capped_diff(int max_bytes, filestate* diff, filestate* res);
 void save_file(byte* fileBuffer, int fileSize, char* filename);
 void set_playcount_mappings(filestate* diff, int numFiles);
 int compare_music_files(music_file* a, music_file* b);
-void TEST_PARSING_LOGIC();
 
 byte* load_file(char fileName[], off_t fileSize) 
 {
@@ -174,20 +172,7 @@ void get_capped_diff(int max_bytes, filestate* diff, filestate* res)
     int numFiles = diff->numFiles;                                                                                 
     set_playcount_mappings(diff, numFiles);
     printf("Playcounts have been set\n");
-
-    for (int i = 0; i < numFiles; ++i)
-    {
-        printf("1 Filename:%s, PC: %d, MB: %d\n",diff->music_files[i].filename, diff->music_files[i].playCount, diff->music_files[i].fileSize);
-    }
-
     qsort(diff->music_files, numFiles, sizeof(music_file),(*compare_music_files));
-
-    for (int i = 0; i < numFiles; ++i)
-    {
-        printf("2 Filename:%s, PC: %d, MB: %d\n",diff->music_files[i].filename, diff->music_files[i].playCount, diff->music_files[i].fileSize);
-    }
-
-
     printf("Files have been sorted\n");
 
     int capped_bytes = 0;
@@ -210,152 +195,24 @@ void get_capped_diff(int max_bytes, filestate* diff, filestate* res)
 //first compare by playCount, then compare by fileSize
 int compare_music_files(music_file* a, music_file* b)
 {
-    printf("PCA: %d, PCB: %d\n", a->playCount, b->playCount);
     if (a->playCount > b->playCount){
-        printf("one\n");
         return -1;
     }
     else if (a->playCount < b->playCount){
-          printf("two\n");
         return 1;
     }
     else{//playCounts are the same, perhaps both 0
         if (a->fileSize > b->fileSize){
-
-            printf("three\n");
             return 1;
         }
         else if (a->fileSize < b->fileSize){
-
-
-              printf("four\n");
             return -1;
         }
         else{
-            printf("five\n");
             return 0;
         }
     }
 }
-
-void TEST_PARSING_LOGIC(){
-
-    printf("Testing parsing logic\n");
-
-    FILE * fp;
-    char * line = NULL;
-    size_t len = 0;
-    ssize_t read;
-
-    int play_count;
-    int files_mapped = 0; 
-    int lookForFilename = 0;
-    char * raw_filename;
-
-    int i;
-    printf("TSetup done\n");
-
-    fp = fopen("it.xml", "r");
-    printf("Attempting to open file\n");
-    if (fp == NULL)
-        printf("Unable to open iTunes Music Library.xml\n");
-        //return;
-        //exit(EXIT_FAILURE);
-
-    printf("File opened \n");
-    while ((read = getline(&line, &len, fp)) != -1) {
-        
-        //if a Play Count line is found
-        if(!strncmp(line, "\t\t\t<key>Play C", 14)){ 
-            //extract the play count from the line
-            //printf("%s\n", line);
-            //printf("%s\n", &line[33]);
-            play_count = atoi(&line[33]);
-            //printf("%d\n", play_count);
-            lookForFilename = 1;
-        }
-
-        if(lookForFilename && !strncmp(line, "\t\t\t<key>Location", 16)){
-            //extract filename        
-            //printf("found a location line\n");
-            raw_filename = line;
-            char *p = strtok(line, "/");
-            while( p!= NULL && strncmp(p,"string>",7)){
-                raw_filename = p;
-                //printf("%s\n", raw_filename);
-                //printf("NEXT\n");
-                p = strtok(NULL, "/");//NULL paramater means use last string that was being tokenized
-            }
-
-            //printf("raw_filename: %s\n",raw_filename);
-            int charIdx = 0;
-            int spaces = 0;
-            //cleanup: strip "%20" substrings and remove "<" char that is always at the end
-            //printf("%s\n",raw_filename);
-            while(charIdx < (strlen(raw_filename) -1)){ 
-                //technically this could go out of bounds, but all well formed files should end in a file extension 
-                if(raw_filename[charIdx] == '%' && raw_filename[charIdx+1] == '2' && raw_filename[charIdx+2] == '0'){
-                    //printf("%d\n",charIdx);
-                    spaces++;
-                    charIdx+=3;
-                }
-                else{
-                    charIdx++;
-                }
-            }
-            //printf("RF: %s\n",raw_filename);
-            ///printf("Spaces found: %d\n",spaces);
-
-            //strcpy(raw_filename, filename);
-            char filename[strlen(raw_filename) - 1 - (spaces*2)];
-            //filename = (*char) malloc(sizeof(char) * (strlen(raw_filename) - 1 - (spaces*2))); //replace 3 chars with 1 char
-            //printf("Spaces found: %s\n",filename);
-
-
-            charIdx = 0;
-            i = 0;
-            //cleanup: strip "%20" substrings and remove "<" char that is always at the end
-            while(charIdx < (strlen(raw_filename) - 1)){ 
-                //technically this could go out of bounds, but all well formed files should end in a file extension 
-                if(raw_filename[charIdx] == '%' && raw_filename[charIdx+1] == '2' && raw_filename[charIdx+2] == '0'){
-                    filename[i++] = ' ';
-                    charIdx+=3;
-                    //printf("Spaces found: %d\n",charIdx);
-
-                }
-                else{
-                    filename[i++] = raw_filename[charIdx++];  
-                     //printf("Spaces found: %d\n",charIdx);
- 
-                }
-                //printf("filename: %s\n", filename);
-            }
-            //add null char... do I actually need to do this?
-            //filename[strlen(filename)] ='\0';
-            //printf("done\n");
-            printf("filename: %s\n", filename);
-            printf("play_count: %d\n", play_count);
-
-            //now check for a matching music file and add its play count if found
-            //for(i = 0; i < numFiles; i++){
-             //   if(!strcmp(filename, diff->music_files[i].filename)){
-            //        diff->music_files[i].playCount = play_count;
-            //        files_mapped++;
-            //        break;
-            //    }
-            //}
-            lookForFilename = 0;
-
-        }
-        
-    }
-    printf("Ending Testing parsing logic\n");
-
-    if (line)
-        free(line);
-    exit(EXIT_SUCCESS);
-}
-
 
 void set_playcount_mappings(filestate* diff, int numFiles){
     printf("Setting playcount mappings from iTunes Music Library.xml\n");  
@@ -377,11 +234,7 @@ void set_playcount_mappings(filestate* diff, int numFiles){
         printf("Unable to open or find iTunes Music Library.xml. Mappings will not be added. Ensure it is in the working directory\n");
         return;
     }
-    //exit(EXIT_FAILURE);
-    //returning will 
-
-    printf("Num files: %d\n", numFiles);
-
+   
     while ((read = getline(&line, &len, fp)) != -1) {
         
         //If we've mapped every file, break
@@ -418,9 +271,6 @@ void set_playcount_mappings(filestate* diff, int numFiles){
                     charIdx++;
                 }
             }
-
-
-
             //String length minus 1 for the "<" and - 2 per safe 
             char filename[strlen(raw_filename) - 1 - (spaces*2)];
             charIdx = 0;
@@ -434,8 +284,7 @@ void set_playcount_mappings(filestate* diff, int numFiles){
                     filename[i++] = raw_filename[charIdx++];  
                 }
             }
-            printf("PC: %d, filename: %s\n", play_count, filename);
-
+        
             //now check for a matching music file and add its play count if found
             for(i = 0; i < numFiles; i++){
                 if(!strcmp(filename, diff->music_files[i].filename)){
@@ -445,15 +294,12 @@ void set_playcount_mappings(filestate* diff, int numFiles){
                 }
             }
             playCountFound = 0; 
-        }
-        
+        }   
     }
- 
     printf("%d files were mapped to playcounts\n", files_mapped);
 
     if (line)
         free(line);
-    //exit(EXIT_SUCCESS);
 }
 
 #endif
