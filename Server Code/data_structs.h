@@ -24,7 +24,6 @@ typedef struct
 
 typedef struct
 {
-	struct sockaddr_in hostIP;
 	int numFiles;
 	music_file* music_files;
 } filestate;
