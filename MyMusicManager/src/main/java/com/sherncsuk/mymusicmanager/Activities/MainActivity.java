@@ -129,7 +129,7 @@ public class MainActivity extends Activity {
 
             alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
-                    int numBytes = Integer.parseInt(input.getText().toString()) * 1048576;
+                    int numBytes = (int)(Double.parseDouble(input.getText().toString()) * 1048576);
                     networkingUtil.sendInitialMessage(sock, Message.MessageType.CAP, numBytes);
                     File currDirectory = currentContext.getExternalFilesDir(Environment.DIRECTORY_MUSIC);
                     Filestate currState = fileUtil.updateFiles(currentContext);
